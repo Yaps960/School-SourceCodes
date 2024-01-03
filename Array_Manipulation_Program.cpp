@@ -169,7 +169,7 @@ void reverseArray(string *arr, int elements){
     system("pause");
 }
 
-void findElement(string *arr, int elements){
+int findElement(string *arr, int elements){
     string word, temp;
     system("cls");
     banner();
@@ -183,12 +183,11 @@ void findElement(string *arr, int elements){
             if(word == temp){
                 cout << arr[i] << " is at index " << i << ".\n";
                 system("pause");
-                return;
+                return 0;
             }
         }
-        cout << word << " is not in the array.\n";
-        system("pause");
     }
+    return -1;
 }
 
 int exitProgram(){
@@ -200,9 +199,8 @@ int exitProgram(){
 }
 
 int main(){
-    int exitflag = 0;
+    int exitflag = 0, x = 1, checker;
     char choice;
-    int x = 1;
     string words[20] = {"root", "sphere", "nervous", "demonstration", "employ", "disappear", "yearn", "respectable", "quiet", "strip"};
     int elements = 10;
     do{
@@ -238,7 +236,11 @@ int main(){
                 }else if(x == 9){
                     reverseArray(words, elements);
                 }else if(x == 11){
-                    findElement(words, elements);
+                    checker = findElement(words, elements);
+                    if(checker == -1){
+                        cout << "Not in the array.\n";
+                        system("pause");
+                    }
                 }else if(x == 13){
                     exitflag = exitProgram();
                 }
