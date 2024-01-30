@@ -1,5 +1,6 @@
 //kulang: error handling, do while
-//mewing bye bye, array error
+//mewing bye bye, array error, CHECKED
+//parameter, ipapasa pointer ng array
 
 #include <iostream>
 
@@ -8,49 +9,33 @@ using namespace std;
 int WaitingTime();
 int TurnAroundTime();
 int Menu();
-void details(int choice);
+void details(int choice, int numProcess);
 void banner();
 void SRTF();
 void PS();
 void RR();
 
-struct ProcessDetails{
-	int numProcess;
-	int arrTime;
-	int burTime;
-	int Priority;
-}pro;
-
 int main(){
-	int *mew;
+    int numProcess;
 	int choice = Menu();
-	switch(choice){
-		case 1:
-			cout << "Shortest Remaining Time First\n";
-			cout << "Number of Processes: ";
-			cin >> pro.numProcess;
-			mew = new int[pro.numProcess];
-			details(choice);
-			break;
-		case 2:
-			cout << "Number of Processes: ";
-			cin >> pro.numProcess;
-			mew[pro.numProcess];
-			cout << "Priority Scheduling\n";
-			details(choice);
-			break;
-		case 3:
-			cout << "Number of Processes: ";
-			cin >> pro.numProcess;
-			mew[pro.numProcess];
-			cout << "Round Robin\n";
-			details(choice);
-			break;
-	}
-	
-	for(int i = 0; i < sizeof(mew) / sizeof(mew[0]); i++){
-		cout << i << '\n';
-	}
+    if(choice == 1)
+		cout << "Shortest Remaining Time First\n";
+    else if(choice == 2)
+		cout << "Priority Scheduling\n";
+    else if(choice == 3)
+		cout << "Round Robin\n";
+    if(choice == 1 || (choice == 2 || choice == 3)){
+        cout << "Number of Processes: ";
+        cin >> numProcess;
+        int mew[numProcess];
+        int arrTime[numProcess];
+        int burTime[numProcess];
+        int Priority[numProcess];
+        details(choice, numProcess);
+        for(int i = 0; i < sizeof(mew) / sizeof(mew[0]); i++){
+            cout << i << '\n';
+        }
+    }
 	return 0;
 }
 
@@ -72,16 +57,16 @@ void banner(){
 	cout << "`8888Y'  `Y88P' YP   YP Y88888P Y8888D' ~Y8888P' Y88888P Y888888P VP   V8P  Y888P  \n\n";
 }
 
-void details(int choice){
-	for(int i = 0; i < pro.numProcess; i++){
+void details(int choice, int numProcess){
+	for(int i = 0; i < numProcess; i++){
 		cout << "Process #" << i+1 << '\n';
 		cout << "Arrival Time: ";
-		cin >> pro.arrTime;
+		cin >> arrTime;
 		cout << "Burst Time: ";
-		cin >> pro.burTime;
+		cin >> burTime
 		if(choice == 2){
 			cout << "Priority: ";
-			cin >> pro.Priority;
+			cin >> Priority;
 		}
 		cout << '\n';
 	}
