@@ -1,21 +1,17 @@
 #include <iostream>
-#include <conio.h>
-#define MAX_INT 2147483647
 
 using namespace std;
 
-// CHECKLIST
-// Loop - Done
-// User Inputs - DONE
-// SRTF
-// PS
-// Round Robin
-void details(int choice, int numProcess, int *arrTime, int *burTime, int *Priority, int *quantumTime);
-void print(int numProcess, int *arrTime, int *burTime, int *Priority, int *quantumTime, int *CTime, int *TurnTime, int *WaitTime, int choice);
+void print(int numProcess, char Process[], int arrTime[], int burTime[], int Priority[], int quantumTime, int CTime[], int TurnTime[], int WaitTime[], int choice);
+void details(int choice, int numProcess, int arrTime[], int burTime[], int Priority[], int *quantumTime);
+void calculateTurn(int arrTime[], int CTime[], int TurnTime[], int numProcess, int index);
+void calculateWait(int TurnTime[], int burTime[], int WaitTime[], int numProcess, int index);
+void SortArrival(int Process[], int arrTime[], int numProcess);
+int HighestBurtime(int *burTime, int numProcess);
 
 int main()
 {
-    bool exitFlag = false;
+    int exitFlag = 0;
     int choice;
     do
     {
@@ -29,66 +25,117 @@ int main()
         }
         cout << '\n';
         int numProcess;
-
-        do{
-        cout << "Number of Processes: ";
-        cin >> numProcess;
-        }while(!numProcess || numProcess <= 0);
-
-        int arrTime[numProcess];
-        int burTime[numProcess];
-        int Priority[numProcess];
-        int CTime[numProcess];
-        int TurnTime[numProcess];
-        int WaitTime[numProcess];
-        int quantumTime;
-        int burstRemaining, lowest, done;
-        int tick = 0;
-        details(choice, numProcess, arrTime, burTime, Priority, &quantumTime);
-        int copyBurTime[numProcess];
-        for(int i = 0; i < numProcess; i++){
-            copyBurTime[i] = burTime[i];
+        if(choice >= 1 && choice <=3){
+            do{
+            cout << "Number of Processes: ";
+            cin >> numProcess;
+            }while(!numProcess || numProcess <= 0);
         }
+            int arrTime[numProcess], burTime[numProcess], Priority[numProcess], CTime[numProcess], TurnTime[numProcess], WaitTime[numProcess];
+            int quantumTime, lowest, done, gantt[30];
+            char Process[numProcess];
+            for(int i = 0; i <numProcess; i++){
+                if(65+i > 90)
+                Process[i] = 71 + i;
+                else
+                Process[i] = 65 + i;
+            }
+            int tick = 0, mew = 0;
+            int copyBurTime[numProcess];
+        if(choice >= 1 && choice <=3){
+            details(choice, numProcess, arrTime, burTime, Priority, &quantumTime);
+            for(int i = 0; i < numProcess; i++){
+                copyBurTime[i] = burTime[i];
+            }
+        }
+        copyBurTime[numProcess] = 9999;
         switch (choice)
         {
         case 1:
-            do{
-                burstRemaining = 0;
-                lowest = MAX_INT;
+            do
+            {
+                lowest = numProcess;
                 for(int i=0; i<numProcess; i++)
                 {
-                    if(arrTime[i]<=tick && copyBurTime[i]<lowest && copyBurTime[i]>0 )
+                    if(arrTime[i]<=tick && copyBurTime[i]< copyBurTime[lowest] && copyBurTime[i]>0 )
                         lowest=i;
                 }
                 copyBurTime[lowest]--;
                 
                 if(copyBurTime[lowest] == 0){
+                    mew++;
                     done = tick + 1;
-                    CTime[lowest] = end;
-                    TurnTime[lowest] = CTime[lowest] - arrTime[lowest];
-                    WaitTime[lowest] = TurnTime[lowest] - burTime[lowest];
+                    CTime[lowest] = done;
                 }
-
-                for(int i = 0; i < numProcess; i++){
-                    burstRemaining += copyBurTime[i];
-                }
-            }while(burstRemaining != 0);
+                tick++;
+            }while(mew!=numProcess);
+            calculateTurn(arrTime, CTime, TurnTime, numProcess, 0);
+            calculateWait(TurnTime, burTime, WaitTime, numProcess, 0);
+            print(numProcess, Process, arrTime, burTime, Priority, quantumTime, CTime, TurnTime, WaitTime, choice);
             break;
         case 2:
+            do{
+                lowest = numProcess;
+                for(int i=0; i<numProcess; i++)
+                {
+                    if(arrTime[i] <= tick && Priority[i]<Priority[lowest] && copyBurTime[i]>0 )
+                        lowest=i;
+                }
+                copyBurTime[lowest]--;
+
+                if(copyBurTime[lowest]==0)
+                {
+                    mew++;
+                    done=tick + 1;
+                    CTime[lowest] = done;
+                }
+                tick++;
+            }while(mew != numProcess);
+            calculateTurn(arrTime, CTime, TurnTime, numProcess, 0);
+            calculateWait(TurnTime, burTime, WaitTime, numProcess, 0);
+            print(numProcess, Process, arrTime, burTime, Priority, quantumTime, CTime, TurnTime, WaitTime, choice);
             break;
         case 3:
+            SortArrival(Process, arrTime, numProcess);
+            
             break;
         case 4:
-            exitFlag = true;
+            exitFlag = 1;
             break;
         }
-    } while (!exitFlag);
+    } while (exitFlag != 1);
 
     return 0;
 }
 
-void details(int choice, int numProcess, int *arrTime, int *burTime, int *Priority, int *quantumTime)
-{
+
+
+
+void print(int numProcess, char Process[], int arrTime[], int burTime[], int Priority[], int quantumTime, int CTime[], int TurnTime[], int WaitTime[], int choice){
+    double aveWait, aveTurn;
+    if(choice == 3)
+        cout << "Quantum_Time = " << quantumTime << endl;
+    cout << "Process" << "\t" << "Arrival_Time" << "\t" << "Burst_Time" << "\t";
+    if(choice == 2)
+        cout << "Priority_Level" << "\t";
+    cout << "Waiting_Time" << "\t" << "Turnaround_Time" << "\t"<<"Completion_Time" << endl;
+    for(int i=0; i<numProcess; i++)
+    {
+        cout << Process[i] << "\t\t" << arrTime[i] << "\t\t" << burTime[i] << "\t\t";
+        if(choice == 2)
+            cout << Priority[i] << "\t\t";
+        cout << WaitTime[i] << "\t\t" << TurnTime[i] << "\t\t" << CTime[i] << endl;
+        aveWait = aveWait + WaitTime[i];
+        aveTurn = aveTurn + TurnTime[i];
+    }
+    cout << "\nAverage Turnaround Time = " << aveTurn/numProcess << "m/s";
+    cout << "\nAverage Waiting Time = " << aveWait/numProcess << "m/s\n\n";
+}
+
+
+
+
+void details(int choice, int numProcess, int arrTime[], int burTime[], int Priority[], int *quantumTime){
     for (int i = 0; i < numProcess; i++)
     {
         cout << "Process #" << i + 1 << '\n';
@@ -125,131 +172,43 @@ void details(int choice, int numProcess, int *arrTime, int *burTime, int *Priori
     }
 }
 
-void print(int numProcess, int *arrTime, int *burTime, int *Priority, int *quantumTime, int *CTime, int *TurnTime, int *WaitTime, int choice){
-    int aveWait = 0, aveTurn = 0;
-    cout<<"Process"<<"\t"<< "Burst Time"<<"\t"<<"Arrival Time" <<"\t";
-    if(choice == 2){
-        cout << "Priority Level";
-    }
-    cout << "\t" << "Waiting Time" <<"\t"<<"Turnaround Time"<< "\t"<<"Completion Time"<<endl;
-    if(choice == 3){
-        cout << "Quantum Time = " << quantumTime;
-    }
-    for(i=0; i<numProcess; i++)
-    {
-        cout<<"p"<<i<<"\t\t"<<burTime[i]<<"\t\t"<<arrTime[i]<<"\t\t"<<WaitTime[i]<<"\t\t"<<TurnTime[i]<<"\t\t"<<CTime[i]<<endl;
-        aveWait = aveWait + WaitTime[i];
-        aveTurn = aveTurn + TurnTime[i];
-    }
-    cout
+
+
+
+void calculateTurn(int arrTime[], int CTime[], int TurnTime[], int numProcess, int index){
+    if(index==numProcess)
+        return;
+    TurnTime[index] = CTime[index] - arrTime[index];
+    calculateTurn(arrTime, CTime, TurnTime, numProcess, ++index);
 }
 
 
 
 
-/*
-GENERAL ALGORITHM
-1. Search for the lowest and second lowest arrival time
-2. Compare the burst time with those arrival times
-3. If second arrival time is more than burst time, burst time set to 0
-4. Else, burst time - (second lowest arrival - lowest arrival)
-5. If arrival time not completely traversed, Completion Time += arrival time
-6. Else, Comlpetion time += burst time
-7. If burst time is 0, completion time of that process = current value of completion time
-8. Repeat step 1 where second lowest is the lowest now
-9. Turn Around Time = Completion Time - Arrival Time
-10. Waiting Time = Turn Around Time - Burst Time
-11. Average step 9 and 10 individually
-*/
+void calculateWait(int TurnTime[], int burTime[], int WaitTime[], int numProcess, int index){
+    if(index==numProcess)
+        return;
+    WaitTime[index] = TurnTime[index] - burTime[index];
+    calculateWait(TurnTime, burTime, WaitTime, numProcess, ++index);
+}
 
-//ALGORITHM SRTF
 
-//First Lowest
-int minArr(int arrTime[], int numProcess)
-{
-    int lowest = arrTime[0];
-    for(int i; i < numProcess; i++){
-        if(lowest > arrTime[i]){
-            lowest = arrTime[i];
+
+
+void SortArrival(int Process[], int arrTime[], int numProcess){
+    for (int i = 0; i < numProcess-1; i++){
+        int min = i;
+        for (int j = i+1; j< numProcess; j++){
+            if (arrTime[j]<arrTime[min])
+                min=j;
         }
-    }
-    return lowest;
-}
-
-//Second Lowest
-int secondMin(int arrTime[], int numProcess, int lowest){
-    int secondLowest = arrTime[0];
-    for(int i; i < numProcess; i++){
-        if(secondLowest > arrTime[i] && arrTime[i] > lowest){
-            secondLowest = arrTime[i];
-        }
-    }
-    return secondLowest;
-}
-
-int maxArr(int arrTime[], int numProcess)
-{
-    int highest = arrTime[0];
-    for(int i; i < numProcess; i++){
-        if(highest < arrTime[i]){
-            highest = arrTime[i];
-        }
-    }
-    return highest;
-}
-
-
-void PS()
-{
-}
-
-void RR(int *arrTime, int *burTime, int *Ctime,int *WTime, int *TATime, int numProcess, int *quantum, int time, int lowest, int highest) {
-    int executeTime;
-
-    while (true) {
-        bool processComplete = true;
-
-        for (int i = 0; i < numProcess; i++) {
-            if (burTime[i] > 0) {
-                processComplete = false;
-
-                if (burTime[i] < *quantum) {
-                    executeTime = burTime[i];
-                } else {
-                    executeTime = *quantum;
-                }
-
-                burTime[i] -= executeTime;
-
-                time += executeTime;
-                Ctime[i] = time;
-
-                if (lowest == -1) {
-                    lowest = minArr(arrTime, numProcess);
-                    highest = maxArr(arrTime, numProcess);
-                }
-
-                int secondLowest = secondMin(arrTime, numProcess, lowest);
-
-                if (arrTime[secondLowest] >= burTime[lowest]) {
-                    executeTime = burTime[secondLowest];
-                    burTime[lowest] = 0;
-                } else {
-                    executeTime = arrTime[secondLowest] - time;
-                    burTime[lowest] -= executeTime;
-                }
-
-                WTime[i] = time - arrTime[i] - executeTime;
-                TATime[i] = time - arrTime[i];
-
-                RR(arrTime, burTime, Ctime, WTime, TATime, numProcess, quantum, time, lowest, highest);
-
-                
-            }
-        }
-
-        if (processComplete) {
-            break;
+        if (min!=i){
+            int temp=arrTime[min];
+            int temp2=Process[min];
+            arrTime[min] = arrTime[i];
+            Process[min] = Process[i];
+            arrTime[i] = temp;
+            Process[i] = temp2;
         }
     }
 }
